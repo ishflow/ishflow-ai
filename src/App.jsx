@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Home, Search, BusinessProfile, PartnerLogin, PartnerRegister, PartnerDashboard, PartnerServices, PartnerServiceForm, PartnerStaff, PartnerStaffForm, BookAppointment } from './pages'
+import { Home, Search, BusinessProfile, PartnerLogin, PartnerRegister, PartnerDashboard, PartnerServices, PartnerServiceForm, PartnerStaff, PartnerStaffForm, PartnerAppointments, PartnerCustomers, PartnerSettings, BookAppointment } from './pages'
 
 function App() {
   return (
@@ -20,6 +20,9 @@ function App() {
         <Route path="/partner/staff" element={<PartnerStaff />} />
         <Route path="/partner/staff/new" element={<PartnerStaffForm />} />
         <Route path="/partner/staff/:id/edit" element={<PartnerStaffForm />} />
+        <Route path="/partner/appointments" element={<PartnerAppointments />} />
+        <Route path="/partner/customers" element={<PartnerCustomers />} />
+        <Route path="/partner/settings" element={<PartnerSettings />} />
         
         {/* Customer/Booking Routes */}
         <Route path="/book/:businessId" element={<BookAppointment />} />

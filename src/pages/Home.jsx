@@ -5,12 +5,12 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false)
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#fafbfc' }}>
       {/* Navbar */}
       <nav style={{ 
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, 
-        backgroundColor: 'white', borderBottom: '1px solid #e5e7eb',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+        backgroundColor: 'white', borderBottom: '1px solid #f0f0f0',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
       }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', padding: '0 16px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '64px' }}>
@@ -20,12 +20,14 @@ export default function Home() {
             
             {/* Desktop Menu */}
             <div className="desktop-menu" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Link to="/partner/login" style={{ padding: '8px 16px', fontSize: '14px', fontWeight: '500', color: '#374151', textDecoration: 'none' }}>
+              <Link to="/partner/login" style={{ padding: '8px 16px', fontSize: '14px', fontWeight: '500', color: '#64748b', textDecoration: 'none' }}>
                 Giriş Yap
               </Link>
               <Link to="/partner/register" style={{ 
                 padding: '10px 20px', fontSize: '14px', fontWeight: '600', color: 'white', 
-                backgroundColor: '#2563eb', borderRadius: '8px', textDecoration: 'none'
+                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', 
+                borderRadius: '10px', textDecoration: 'none',
+                boxShadow: '0 4px 14px rgba(99, 102, 241, 0.25)'
               }}>
                 Ücretsiz Başla
               </Link>
@@ -37,7 +39,7 @@ export default function Home() {
               onClick={() => setMenuOpen(!menuOpen)}
               style={{ display: 'none', padding: '8px', background: 'none', border: 'none', cursor: 'pointer' }}
             >
-              <svg width="24" height="24" fill="none" stroke="#374151" strokeWidth="2">
+              <svg width="24" height="24" fill="none" stroke="#64748b" strokeWidth="2">
                 {menuOpen ? (
                   <path d="M6 6l12 12M6 18L18 6" />
                 ) : (
@@ -51,16 +53,17 @@ export default function Home() {
         {/* Mobile Menu */}
         {menuOpen && (
           <div className="mobile-menu" style={{ 
-            display: 'none', padding: '16px', borderTop: '1px solid #e5e7eb', backgroundColor: 'white'
+            display: 'none', padding: '16px', borderTop: '1px solid #f0f0f0', backgroundColor: 'white'
           }}>
             <Link to="/partner/login" onClick={() => setMenuOpen(false)} style={{ 
-              display: 'block', padding: '12px', fontSize: '16px', color: '#374151', textDecoration: 'none', textAlign: 'center'
+              display: 'block', padding: '12px', fontSize: '16px', color: '#64748b', textDecoration: 'none', textAlign: 'center'
             }}>
               Giriş Yap
             </Link>
             <Link to="/partner/register" onClick={() => setMenuOpen(false)} style={{ 
               display: 'block', padding: '12px', marginTop: '8px', fontSize: '16px', fontWeight: '600',
-              color: 'white', backgroundColor: '#2563eb', borderRadius: '8px', textDecoration: 'none', textAlign: 'center'
+              color: 'white', background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', 
+              borderRadius: '10px', textDecoration: 'none', textAlign: 'center'
             }}>
               Ücretsiz Başla
             </Link>
@@ -69,29 +72,29 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <section style={{ paddingTop: '100px', paddingBottom: '60px', padding: '100px 16px 60px', background: 'linear-gradient(to bottom, white, #f9fafb)' }}>
+      <section style={{ paddingTop: '100px', paddingBottom: '60px', padding: '100px 16px 60px', background: 'linear-gradient(to bottom, white, #fafbfc)' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto', textAlign: 'center' }}>
           {/* Badge */}
           <div style={{ 
             display: 'inline-flex', alignItems: 'center', gap: '8px', 
-            backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', 
+            backgroundColor: '#f0f4ff', border: '1px solid #c7d2fe', 
             padding: '8px 16px', borderRadius: '9999px', fontSize: '13px', fontWeight: '500', marginBottom: '24px'
           }}>
-            <span style={{ width: '8px', height: '8px', backgroundColor: '#2563eb', borderRadius: '50%' }}></span>
-            <span style={{ color: '#1d4ed8' }}>Randevu yönetiminde yeni dönem</span>
+            <span style={{ width: '8px', height: '8px', backgroundColor: '#6366f1', borderRadius: '50%' }}></span>
+            <span style={{ color: '#4f46e5' }}>Randevu yönetiminde yeni dönem</span>
           </div>
           
           {/* Title */}
-          <h1 className="hero-title" style={{ fontSize: '40px', fontWeight: 'bold', color: '#111827', marginBottom: '20px', lineHeight: '1.15' }}>
+          <h1 className="hero-title" style={{ fontSize: '40px', fontWeight: 'bold', color: '#1e293b', marginBottom: '20px', lineHeight: '1.15' }}>
             Randevu Yönetimini
             <br />
-            <span style={{ background: 'linear-gradient(to right, #2563eb, #06b6d4)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+            <span style={{ background: 'linear-gradient(to right, #6366f1, #8b5cf6)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               Kolaylaştırın
             </span>
           </h1>
           
           {/* Subtitle */}
-          <p style={{ fontSize: '17px', color: '#4b5563', maxWidth: '540px', margin: '0 auto 32px', lineHeight: '1.6' }}>
+          <p style={{ fontSize: '17px', color: '#64748b', maxWidth: '540px', margin: '0 auto 32px', lineHeight: '1.6' }}>
             Müşterileriniz online randevu alsın, siz işinize odaklanın. 
             Kuaför, klinik, spor salonu — her işletme için.
           </p>
@@ -101,8 +104,9 @@ export default function Home() {
             <Link to="/partner/register" style={{ 
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', 
               padding: '16px 24px', fontSize: '16px', fontWeight: '600', color: 'white', 
-              backgroundColor: '#2563eb', borderRadius: '12px', textDecoration: 'none',
-              boxShadow: '0 10px 25px -5px rgba(37, 99, 235, 0.4)'
+              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', 
+              borderRadius: '12px', textDecoration: 'none',
+              boxShadow: '0 10px 25px -5px rgba(99, 102, 241, 0.35)'
             }}>
               İşletme Olarak Başla
               <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -111,9 +115,9 @@ export default function Home() {
             </Link>
             <Link to="/search" style={{ 
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', 
-              padding: '16px 24px', fontSize: '16px', fontWeight: '600', color: '#374151', 
+              padding: '16px 24px', fontSize: '16px', fontWeight: '600', color: '#1e293b', 
               backgroundColor: 'white', borderRadius: '12px', textDecoration: 'none',
-              border: '1px solid #d1d5db', boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
+              border: '1px solid #e2e8f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
             }}>
               <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -123,7 +127,7 @@ export default function Home() {
           </div>
 
           {/* Trust Badges */}
-          <p style={{ fontSize: '13px', color: '#6b7280' }}>
+          <p style={{ fontSize: '13px', color: '#94a3b8' }}>
             ✓ Kurulum gerektirmez<br className="mobile-only" /><span className="desktop-only"> · </span>
             ✓ İlk ay ücretsiz<br className="mobile-only" /><span className="desktop-only"> · </span>
             ✓ Kredi kartı gerekmez
@@ -132,27 +136,27 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section style={{ padding: '60px 16px', backgroundColor: 'white', borderTop: '1px solid #e5e7eb', borderBottom: '1px solid #e5e7eb' }}>
+      <section style={{ padding: '60px 16px', backgroundColor: 'white', borderTop: '1px solid #f0f0f0', borderBottom: '1px solid #f0f0f0' }}>
         <div style={{ maxWidth: '1100px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '48px' }}>
-            <p style={{ fontSize: '13px', fontWeight: '600', color: '#2563eb', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Özellikler</p>
-            <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: '#111827', marginBottom: '12px' }}>
+            <p style={{ fontSize: '13px', fontWeight: '600', color: '#6366f1', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Özellikler</p>
+            <h2 style={{ fontSize: '28px', fontWeight: 'bold', color: '#1e293b', marginBottom: '12px' }}>
               Neden ishflow?
             </h2>
-            <p style={{ fontSize: '16px', color: '#4b5563', maxWidth: '400px', margin: '0 auto' }}>
+            <p style={{ fontSize: '16px', color: '#64748b', maxWidth: '400px', margin: '0 auto' }}>
               Modern işletmeler için tasarlanmış randevu sistemi
             </p>
           </div>
           
           <div className="features-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(1, 1fr)', gap: '16px' }}>
             {[
-              { icon: '📅', title: 'Online Randevu', desc: 'Müşterileriniz 7/24 online randevu alabilir.', bg: '#dbeafe' },
-              { icon: '👥', title: 'Personel Yönetimi', desc: 'Her çalışanın kendi takvimi olsun.', bg: '#dcfce7' },
-              { icon: '🔔', title: 'Hatırlatmalar', desc: 'Otomatik SMS ve Telegram bildirimleri.', bg: '#ffedd5' },
+              { icon: '📅', title: 'Online Randevu', desc: 'Müşterileriniz 7/24 online randevu alabilir.', bg: '#f0f4ff' },
+              { icon: '👥', title: 'Personel Yönetimi', desc: 'Her çalışanın kendi takvimi olsun.', bg: '#ecfdf5' },
+              { icon: '🔔', title: 'Hatırlatmalar', desc: 'Otomatik SMS ve Telegram bildirimleri.', bg: '#fef3c7' },
             ].map((f, i) => (
               <div key={i} style={{ 
                 backgroundColor: 'white', borderRadius: '16px', padding: '24px', 
-                border: '1px solid #e5e7eb', boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                border: '1px solid #f0f0f0', boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
               }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
                   <div style={{ 
@@ -162,8 +166,8 @@ export default function Home() {
                     {f.icon}
                   </div>
                   <div>
-                    <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', marginBottom: '4px' }}>{f.title}</h3>
-                    <p style={{ fontSize: '15px', color: '#4b5563', lineHeight: '1.5' }}>{f.desc}</p>
+                    <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#1e293b', marginBottom: '4px' }}>{f.title}</h3>
+                    <p style={{ fontSize: '15px', color: '#64748b', lineHeight: '1.5' }}>{f.desc}</p>
                   </div>
                 </div>
               </div>
@@ -173,7 +177,7 @@ export default function Home() {
       </section>
 
       {/* Stats Section */}
-      <section style={{ padding: '48px 16px', backgroundColor: '#f9fafb' }}>
+      <section style={{ padding: '48px 16px', backgroundColor: '#fafbfc' }}>
         <div style={{ maxWidth: '600px', margin: '0 auto' }}>
           <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '24px', textAlign: 'center' }}>
             {[
@@ -183,8 +187,8 @@ export default function Home() {
               { value: '24/7', label: 'Destek' },
             ].map((s, i) => (
               <div key={i}>
-                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#2563eb', marginBottom: '4px' }}>{s.value}</p>
-                <p style={{ fontSize: '13px', color: '#6b7280', fontWeight: '500' }}>{s.label}</p>
+                <p style={{ fontSize: '32px', fontWeight: 'bold', color: '#6366f1', marginBottom: '4px' }}>{s.value}</p>
+                <p style={{ fontSize: '13px', color: '#94a3b8', fontWeight: '500' }}>{s.label}</p>
               </div>
             ))}
           </div>
@@ -195,9 +199,9 @@ export default function Home() {
       <section style={{ padding: '60px 16px', backgroundColor: 'white' }}>
         <div style={{ maxWidth: '500px', margin: '0 auto' }}>
           <div style={{ 
-            background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)', 
+            background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', 
             borderRadius: '20px', padding: '40px 24px', textAlign: 'center',
-            boxShadow: '0 25px 50px -12px rgba(37, 99, 235, 0.25)'
+            boxShadow: '0 25px 50px -12px rgba(99, 102, 241, 0.3)'
           }}>
             <div style={{ 
               width: '56px', height: '56px', backgroundColor: 'rgba(255,255,255,0.2)', 
@@ -209,13 +213,14 @@ export default function Home() {
             <h2 style={{ fontSize: '26px', fontWeight: 'bold', color: 'white', marginBottom: '12px' }}>
               Hemen Başlayın
             </h2>
-            <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.8)', marginBottom: '24px' }}>
+            <p style={{ fontSize: '15px', color: 'rgba(255,255,255,0.85)', marginBottom: '24px' }}>
               İlk ay ücretsiz. Kredi kartı gerekmez.
             </p>
             <Link to="/partner/register" style={{ 
               display: 'inline-flex', alignItems: 'center', gap: '8px', 
               padding: '14px 28px', fontSize: '16px', fontWeight: '600', 
-              color: '#2563eb', backgroundColor: 'white', borderRadius: '10px', textDecoration: 'none'
+              color: '#6366f1', backgroundColor: 'white', borderRadius: '10px', textDecoration: 'none',
+              boxShadow: '0 4px 14px rgba(0,0,0,0.1)'
             }}>
               Ücretsiz Dene
               <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -227,12 +232,12 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer style={{ padding: '24px 16px', backgroundColor: '#f9fafb', borderTop: '1px solid #e5e7eb' }}>
+      <footer style={{ padding: '24px 16px', backgroundColor: '#fafbfc', borderTop: '1px solid #f0f0f0' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
           <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
             <img src="/logo.svg" alt="ishflow" style={{ height: '24px' }} />
           </Link>
-          <p style={{ fontSize: '13px', color: '#6b7280', textAlign: 'center' }}>
+          <p style={{ fontSize: '13px', color: '#94a3b8', textAlign: 'center' }}>
             © 2026 ishflow.ai — Tüm hakları saklıdır.
           </p>
         </div>

@@ -1,111 +1,48 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { auth, supabase } from '../../lib/supabase'
+import PartnerLayout from '../../components/PartnerLayout'
 
-// SVG Icons as components
-const Icons = {
-  home: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
-      <polyline points="9,22 9,12 15,12 15,22"/>
-    </svg>
-  ),
-  calendar: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-      <line x1="16" y1="2" x2="16" y2="6"/>
-      <line x1="8" y1="2" x2="8" y2="6"/>
-      <line x1="3" y1="10" x2="21" y2="10"/>
-    </svg>
-  ),
-  services: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="7" height="7"/>
-      <rect x="14" y="3" width="7" height="7"/>
-      <rect x="14" y="14" width="7" height="7"/>
-      <rect x="3" y="14" width="7" height="7"/>
-    </svg>
-  ),
-  users: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
-      <circle cx="9" cy="7" r="4"/>
-      <path d="M23 21v-2a4 4 0 00-3-3.87"/>
-      <path d="M16 3.13a4 4 0 010 7.75"/>
-    </svg>
-  ),
-  customers: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-      <circle cx="12" cy="7" r="4"/>
-    </svg>
-  ),
-  settings: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="12" r="3"/>
-      <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
-    </svg>
-  ),
-  search: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="8"/>
-      <line x1="21" y1="21" x2="16.65" y2="16.65"/>
-    </svg>
-  ),
-  bell: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-      <path d="M13.73 21a2 2 0 01-3.46 0"/>
-    </svg>
-  ),
-  logout: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-      <polyline points="16,17 21,12 16,7"/>
-      <line x1="21" y1="12" x2="9" y2="12"/>
-    </svg>
-  ),
-  plus: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" y1="5" x2="12" y2="19"/>
-      <line x1="5" y1="12" x2="19" y2="12"/>
-    </svg>
-  ),
-  chevronLeft: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="15,18 9,12 15,6"/>
-    </svg>
-  ),
-  menu: (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="3" y1="12" x2="21" y2="12"/>
-      <line x1="3" y1="6" x2="21" y2="6"/>
-      <line x1="3" y1="18" x2="21" y2="18"/>
-    </svg>
-  ),
-  x: (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18"/>
-      <line x1="6" y1="6" x2="18" y2="18"/>
-    </svg>
-  ),
-  trendingUp: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"/>
-      <polyline points="17,6 23,6 23,12"/>
-    </svg>
-  )
-}
+// Icons
+const PlusIcon = (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="12" y1="5" x2="12" y2="19"/>
+    <line x1="5" y1="12" x2="19" y2="12"/>
+  </svg>
+)
+
+const UsersIcon = (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+    <circle cx="9" cy="7" r="4"/>
+    <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+    <path d="M16 3.13a4 4 0 010 7.75"/>
+  </svg>
+)
+
+const TrendingUpIcon = (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="23,6 13.5,15.5 8.5,10.5 1,18"/>
+    <polyline points="17,6 23,6 23,12"/>
+  </svg>
+)
+
+const CalendarIcon = (
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+    <line x1="16" y1="2" x2="16" y2="6"/>
+    <line x1="8" y1="2" x2="8" y2="6"/>
+    <line x1="3" y1="10" x2="21" y2="10"/>
+  </svg>
+)
 
 export default function PartnerDashboard() {
   const navigate = useNavigate()
-  const location = useLocation()
   const [user, setUser] = useState(null)
   const [partner, setPartner] = useState(null)
   const [stats, setStats] = useState({ services: 0, staff: 0, appointments: 0, customers: 0 })
+  const [recentAppointments, setRecentAppointments] = useState([])
   const [loading, setLoading] = useState(true)
-  const [sidebarOpen, setSidebarOpen] = useState(false)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
   useEffect(() => {
     checkUser()
@@ -139,15 +76,26 @@ export default function PartnerDashboard() {
         appointments: appointmentsRes.count || 0,
         customers: customersRes.count || 0
       })
+
+      // Load recent appointments
+      const { data: appointments } = await supabase
+        .from('appointments')
+        .select(`
+          *,
+          services(name),
+          staff(name),
+          customers(name, phone)
+        `)
+        .eq('partner_id', partnerId)
+        .order('appointment_date', { ascending: true })
+        .order('appointment_time', { ascending: true })
+        .limit(5)
+      
+      setRecentAppointments(appointments || [])
     } catch (err) {
       console.error('Error loading data:', err)
     }
     setLoading(false)
-  }
-
-  const handleLogout = async () => {
-    await auth.signOut()
-    navigate('/partner/login')
   }
 
   if (loading) {
@@ -159,14 +107,6 @@ export default function PartnerDashboard() {
     )
   }
 
-  const menuItems = [
-    { icon: Icons.home, label: 'Ana Sayfa', path: '/partner/dashboard' },
-    { icon: Icons.calendar, label: 'Randevular', path: '/partner/appointments' },
-    { icon: Icons.services, label: 'Hizmetler', path: '/partner/services' },
-    { icon: Icons.users, label: 'Personel', path: '/partner/staff' },
-    { icon: Icons.customers, label: 'Müşteriler', path: '/partner/customers' },
-  ]
-
   const statCards = [
     { label: 'Toplam Randevu', value: stats.appointments, change: '+12%', color: '#6366f1', bgGradient: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)' },
     { label: 'Aktif Hizmet', value: stats.services, change: '+3', color: '#10b981', bgGradient: 'linear-gradient(135deg, #10b981 0%, #34d399 100%)' },
@@ -174,452 +114,240 @@ export default function PartnerDashboard() {
     { label: 'Müşteri', value: stats.customers, change: '+8', color: '#ec4899', bgGradient: 'linear-gradient(135deg, #ec4899 0%, #f472b6 100%)' },
   ]
 
-  const sidebarWidth = sidebarCollapsed ? '72px' : '256px'
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr)
+    return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })
+  }
+
+  const formatTime = (timeStr) => {
+    return timeStr?.slice(0, 5) || ''
+  }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#fafbfc' }}>
-      {/* Mobile Header */}
-      <header className="mobile-header" style={{ 
-        display: 'none', position: 'fixed', top: 0, left: 0, right: 0, zIndex: 40,
-        backgroundColor: 'white', borderBottom: '1px solid #f0f0f0', padding: '0 16px', height: '60px'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: '100%' }}>
-          <button onClick={() => setSidebarOpen(true)} style={{ padding: '8px', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}>
-            {Icons.menu}
-          </button>
-          <img src="/logo.svg" alt="ishflow" style={{ height: '24px' }} />
-          <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '14px', fontWeight: '600', color: '#6366f1' }}>
-            {partner?.company_name?.charAt(0) || 'İ'}
-          </div>
-        </div>
-      </header>
-
-      {/* Sidebar Overlay */}
-      {sidebarOpen && (
-        <div onClick={() => setSidebarOpen(false)} className="sidebar-overlay" style={{ 
-          display: 'none', position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.3)', zIndex: 45 
-        }}></div>
-      )}
-
-      {/* Sidebar */}
-      <aside className="sidebar" style={{ 
-        width: sidebarWidth,
-        backgroundColor: 'white',
-        borderRight: '1px solid #f0f0f0',
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        bottom: 0,
-        zIndex: 50,
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'all 0.2s ease',
-        transform: sidebarOpen ? 'translateX(0)' : undefined
-      }}>
-        {/* Logo Area */}
-        <div style={{ 
-          padding: sidebarCollapsed ? '20px 12px' : '20px 24px',
-          borderBottom: '1px solid #f0f0f0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          minHeight: '72px'
-        }}>
-          {!sidebarCollapsed && (
-            <Link to="/" style={{ display: 'flex', alignItems: 'center', textDecoration: 'none' }}>
-              <img src="/logo.svg" alt="ishflow" style={{ height: '26px' }} />
-            </Link>
-          )}
-          <button 
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="collapse-btn"
-            style={{ 
-              padding: '8px',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              color: '#64748b',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              transition: 'all 0.2s',
-              transform: sidebarCollapsed ? 'rotate(180deg)' : 'none'
-            }}
-          >
-            {Icons.chevronLeft}
-          </button>
-          <button onClick={() => setSidebarOpen(false)} className="close-sidebar" style={{ 
-            display: 'none', padding: '8px', background: 'none', border: 'none', cursor: 'pointer', color: '#64748b'
-          }}>
-            {Icons.x}
-          </button>
-        </div>
-
-        {/* Navigation */}
-        <nav style={{ flex: 1, padding: '16px 12px', overflowY: 'auto' }}>
-          <div style={{ marginBottom: '8px', padding: '0 12px' }}>
-            {!sidebarCollapsed && (
-              <span style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Menü
-              </span>
-            )}
-          </div>
-          {menuItems.map((item, i) => {
-            const isActive = location.pathname === item.path
-            return (
-              <Link 
-                key={i} 
-                to={item.path} 
-                onClick={() => setSidebarOpen(false)}
-                title={sidebarCollapsed ? item.label : undefined}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  padding: sidebarCollapsed ? '12px' : '12px 16px',
-                  borderRadius: '10px',
-                  marginBottom: '4px',
-                  textDecoration: 'none',
-                  backgroundColor: isActive ? '#f0f4ff' : 'transparent',
-                  color: isActive ? '#6366f1' : '#64748b',
-                  fontWeight: isActive ? '600' : '500',
-                  fontSize: '14px',
-                  transition: 'all 0.15s ease',
-                  justifyContent: sidebarCollapsed ? 'center' : 'flex-start'
-                }}
-              >
-                <span style={{ display: 'flex', alignItems: 'center', flexShrink: 0 }}>{item.icon}</span>
-                {!sidebarCollapsed && item.label}
-              </Link>
-            )
-          })}
-
-          <div style={{ marginTop: '24px', marginBottom: '8px', padding: '0 12px' }}>
-            {!sidebarCollapsed && (
-              <span style={{ fontSize: '11px', fontWeight: '600', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                Ayarlar
-              </span>
-            )}
-          </div>
-          <Link 
-            to="/partner/settings" 
-            title={sidebarCollapsed ? 'Ayarlar' : undefined}
+    <PartnerLayout 
+      partner={partner} 
+      user={user} 
+      title="Hoş geldin! 👋" 
+      subtitle="İşletmenizin genel durumu"
+    >
+      {/* Stats Grid */}
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(4, 1fr)', 
+        gap: '24px', 
+        marginBottom: '32px' 
+      }} className="stats-grid">
+        {statCards.map((stat, i) => (
+          <div 
+            key={i} 
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '12px',
-              padding: sidebarCollapsed ? '12px' : '12px 16px',
-              borderRadius: '10px',
-              textDecoration: 'none',
-              color: '#64748b',
-              fontWeight: '500',
-              fontSize: '14px',
-              justifyContent: sidebarCollapsed ? 'center' : 'flex-start'
+              backgroundColor: 'white',
+              borderRadius: '16px',
+              padding: '24px',
+              border: '1px solid #f0f0f0',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+              position: 'relative',
+              overflow: 'hidden'
             }}
           >
-            <span style={{ display: 'flex', alignItems: 'center' }}>{Icons.settings}</span>
-            {!sidebarCollapsed && 'Ayarlar'}
-          </Link>
-        </nav>
-
-        {/* User Section */}
-        <div style={{ 
-          padding: sidebarCollapsed ? '16px 12px' : '16px 20px',
-          borderTop: '1px solid #f0f0f0',
-          backgroundColor: '#fafbfc'
-        }}>
-          {!sidebarCollapsed ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <div style={{ 
-                width: '40px', 
-                height: '40px', 
-                borderRadius: '10px', 
-                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                display: 'flex',
+            <div style={{
+              position: 'absolute',
+              top: '-20px',
+              right: '-20px',
+              width: '100px',
+              height: '100px',
+              background: stat.bgGradient,
+              borderRadius: '50%',
+              opacity: 0.1
+            }}></div>
+            <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '8px', fontWeight: '500' }}>
+              {stat.label}
+            </p>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+              <p style={{ fontSize: '32px', fontWeight: '700', color: '#1e293b', margin: 0 }}>
+                {stat.value}
+              </p>
+              <span style={{ 
+                display: 'inline-flex',
                 alignItems: 'center',
-                justifyContent: 'center',
-                color: 'white',
+                gap: '4px',
+                fontSize: '12px',
                 fontWeight: '600',
-                fontSize: '16px'
+                color: '#10b981',
+                backgroundColor: '#ecfdf5',
+                padding: '4px 8px',
+                borderRadius: '6px'
               }}>
-                {partner?.company_name?.charAt(0) || 'İ'}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <p style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {partner?.company_name || 'İşletme'}
-                </p>
-                <p style={{ fontSize: '12px', color: '#94a3b8', margin: 0, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {user?.email}
-                </p>
-              </div>
-              <button 
-                onClick={handleLogout}
-                title="Çıkış Yap"
-                style={{
-                  padding: '8px',
-                  backgroundColor: 'transparent',
-                  border: 'none',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  color: '#94a3b8',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}
-              >
-                {Icons.logout}
-              </button>
+                {TrendingUpIcon}
+                {stat.change}
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Two Column Layout */}
+      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }} className="two-col">
+        {/* Recent Appointments */}
+        <div style={{ 
+          backgroundColor: 'white',
+          borderRadius: '16px',
+          padding: '24px',
+          border: '1px solid #f0f0f0',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+            <h2 style={{ fontSize: '16px', fontWeight: '600', color: '#1e293b', margin: 0 }}>
+              Yaklaşan Randevular
+            </h2>
+            <Link to="/partner/appointments" style={{ fontSize: '13px', color: '#6366f1', textDecoration: 'none', fontWeight: '500' }}>
+              Tümünü Gör →
+            </Link>
+          </div>
+          
+          {recentAppointments.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94a3b8' }}>
+              <div style={{ marginBottom: '12px' }}>{CalendarIcon}</div>
+              <p style={{ margin: 0 }}>Henüz randevu yok</p>
             </div>
           ) : (
-            <button 
-              onClick={handleLogout}
-              title="Çıkış Yap"
-              style={{
-                width: '100%',
-                padding: '12px',
-                backgroundColor: 'transparent',
-                border: 'none',
-                borderRadius: '10px',
-                cursor: 'pointer',
-                color: '#94a3b8',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              {Icons.logout}
-            </button>
-          )}
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="main-content" style={{ 
-        marginLeft: sidebarWidth, 
-        transition: 'margin-left 0.2s ease',
-        minHeight: '100vh'
-      }}>
-        {/* Top Bar */}
-        <header style={{ 
-          backgroundColor: 'white',
-          borderBottom: '1px solid #f0f0f0',
-          padding: '0 32px',
-          height: '72px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          position: 'sticky',
-          top: 0,
-          zIndex: 30
-        }}>
-          <div>
-            <h1 style={{ fontSize: '20px', fontWeight: '600', color: '#1e293b', margin: 0 }}>
-              Hoş geldin! 👋
-            </h1>
-            <p style={{ fontSize: '14px', color: '#94a3b8', margin: 0 }}>
-              İşletmenizin genel durumu
-            </p>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            {/* Search */}
-            <div style={{ 
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '10px 16px',
-              backgroundColor: '#f8fafc',
-              borderRadius: '10px',
-              border: '1px solid #e2e8f0',
-              width: '240px'
-            }}>
-              <span style={{ color: '#94a3b8' }}>{Icons.search}</span>
-              <input 
-                placeholder="Ara..." 
-                style={{ 
-                  border: 'none', 
-                  background: 'none', 
-                  outline: 'none', 
-                  fontSize: '14px',
-                  color: '#1e293b',
-                  width: '100%'
-                }}
-              />
-              <span style={{ fontSize: '11px', color: '#94a3b8', backgroundColor: '#e2e8f0', padding: '2px 6px', borderRadius: '4px' }}>⌘K</span>
-            </div>
-            {/* Notifications */}
-            <button style={{ 
-              padding: '10px',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: '10px',
-              cursor: 'pointer',
-              color: '#64748b',
-              position: 'relative'
-            }}>
-              {Icons.bell}
-              <span style={{ 
-                position: 'absolute',
-                top: '8px',
-                right: '8px',
-                width: '8px',
-                height: '8px',
-                backgroundColor: '#ef4444',
-                borderRadius: '50%',
-                border: '2px solid white'
-              }}></span>
-            </button>
-            {/* User Avatar */}
-            <div style={{ 
-              width: '40px', 
-              height: '40px', 
-              borderRadius: '10px', 
-              background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: 'white',
-              fontWeight: '600',
-              fontSize: '14px',
-              cursor: 'pointer'
-            }}>
-              {partner?.company_name?.charAt(0) || 'İ'}
-            </div>
-          </div>
-        </header>
-
-        {/* Content */}
-        <div style={{ padding: '32px' }}>
-          {/* Stats Grid */}
-          <div style={{ 
-            display: 'grid', 
-            gridTemplateColumns: 'repeat(4, 1fr)', 
-            gap: '24px', 
-            marginBottom: '32px' 
-          }} className="stats-grid">
-            {statCards.map((stat, i) => (
-              <div 
-                key={i} 
-                style={{
-                  backgroundColor: 'white',
-                  borderRadius: '16px',
-                  padding: '24px',
-                  border: '1px solid #f0f0f0',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-                  position: 'relative',
-                  overflow: 'hidden'
-                }}
-              >
-                <div style={{
-                  position: 'absolute',
-                  top: '-20px',
-                  right: '-20px',
-                  width: '100px',
-                  height: '100px',
-                  background: stat.bgGradient,
-                  borderRadius: '50%',
-                  opacity: 0.1
-                }}></div>
-                <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '8px', fontWeight: '500' }}>
-                  {stat.label}
-                </p>
-                <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
-                  <p style={{ fontSize: '32px', fontWeight: '700', color: '#1e293b', margin: 0 }}>
-                    {stat.value}
-                  </p>
-                  <span style={{ 
-                    display: 'inline-flex',
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {recentAppointments.map((apt, i) => (
+                <div 
+                  key={i}
+                  style={{
+                    display: 'flex',
                     alignItems: 'center',
-                    gap: '4px',
-                    fontSize: '12px',
-                    fontWeight: '600',
-                    color: '#10b981',
-                    backgroundColor: '#ecfdf5',
-                    padding: '4px 8px',
-                    borderRadius: '6px'
+                    gap: '16px',
+                    padding: '16px',
+                    backgroundColor: '#fafbfc',
+                    borderRadius: '12px',
+                    border: '1px solid #f0f0f0'
+                  }}
+                >
+                  <div style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '10px',
+                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white'
                   }}>
-                    {Icons.trendingUp}
-                    {stat.change}
+                    <span style={{ fontSize: '14px', fontWeight: '700', lineHeight: 1 }}>{formatDate(apt.appointment_date).split(' ')[0]}</span>
+                    <span style={{ fontSize: '10px', opacity: 0.9 }}>{formatDate(apt.appointment_date).split(' ')[1]}</span>
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: 0 }}>
+                      {apt.customers?.name || 'Müşteri'}
+                    </p>
+                    <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0 }}>
+                      {apt.services?.name} • {formatTime(apt.appointment_time)}
+                    </p>
+                  </div>
+                  <span style={{
+                    padding: '4px 10px',
+                    borderRadius: '20px',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    backgroundColor: apt.status === 'confirmed' ? '#ecfdf5' : apt.status === 'pending' ? '#fef3c7' : '#f1f5f9',
+                    color: apt.status === 'confirmed' ? '#059669' : apt.status === 'pending' ? '#d97706' : '#64748b'
+                  }}>
+                    {apt.status === 'confirmed' ? 'Onaylı' : apt.status === 'pending' ? 'Bekliyor' : apt.status}
                   </span>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Quick Actions */}
-          <div style={{ 
-            backgroundColor: 'white',
-            borderRadius: '16px',
-            padding: '24px',
-            border: '1px solid #f0f0f0',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-            marginBottom: '24px'
-          }}>
-            <h2 style={{ fontSize: '16px', fontWeight: '600', color: '#1e293b', marginBottom: '20px' }}>
-              Hızlı İşlemler
-            </h2>
-            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
-              <Link 
-                to="/partner/services/new" 
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '12px 20px',
-                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                  color: 'white',
-                  borderRadius: '10px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  textDecoration: 'none',
-                  boxShadow: '0 4px 14px rgba(99, 102, 241, 0.25)',
-                  transition: 'transform 0.2s, box-shadow 0.2s'
-                }}
-              >
-                {Icons.plus}
-                Hizmet Ekle
-              </Link>
-              <Link 
-                to="/partner/staff/new" 
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '12px 20px',
-                  backgroundColor: 'white',
-                  color: '#1e293b',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '10px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  textDecoration: 'none',
-                  transition: 'all 0.2s'
-                }}
-              >
-                {Icons.users}
-                Personel Ekle
-              </Link>
+              ))}
             </div>
+          )}
+        </div>
+
+        {/* Quick Actions */}
+        <div style={{ 
+          backgroundColor: 'white',
+          borderRadius: '16px',
+          padding: '24px',
+          border: '1px solid #f0f0f0',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
+        }}>
+          <h2 style={{ fontSize: '16px', fontWeight: '600', color: '#1e293b', marginBottom: '20px' }}>
+            Hızlı İşlemler
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <Link 
+              to="/partner/services/new" 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '16px',
+                background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
+                color: 'white',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '600',
+                textDecoration: 'none',
+                boxShadow: '0 4px 14px rgba(99, 102, 241, 0.25)',
+                transition: 'transform 0.2s, box-shadow 0.2s'
+              }}
+            >
+              {PlusIcon}
+              Hizmet Ekle
+            </Link>
+            <Link 
+              to="/partner/staff/new" 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '16px',
+                backgroundColor: '#fafbfc',
+                color: '#1e293b',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '600',
+                textDecoration: 'none',
+                transition: 'all 0.2s'
+              }}
+            >
+              {UsersIcon}
+              Personel Ekle
+            </Link>
+            <Link 
+              to="/partner/appointments" 
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                padding: '16px',
+                backgroundColor: '#fafbfc',
+                color: '#1e293b',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                fontSize: '14px',
+                fontWeight: '600',
+                textDecoration: 'none',
+                transition: 'all 0.2s'
+              }}
+            >
+              {CalendarIcon}
+              Randevuları Gör
+            </Link>
           </div>
         </div>
-      </main>
+      </div>
 
-      {/* Responsive Styles */}
       <style>{`
         @media (max-width: 1024px) {
           .stats-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .two-col { grid-template-columns: 1fr !important; }
         }
         @media (max-width: 768px) {
-          .mobile-header { display: flex !important; }
-          .sidebar { transform: translateX(-100%); width: 280px !important; }
-          .sidebar-overlay { display: block !important; }
-          .close-sidebar { display: block !important; }
-          .collapse-btn { display: none !important; }
-          .main-content { margin-left: 0 !important; padding-top: 60px; }
-          .main-content > header { display: none !important; }
-          .main-content > div { padding: 16px !important; }
           .stats-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 12px !important; }
         }
       `}</style>
-    </div>
+    </PartnerLayout>
   )
 }

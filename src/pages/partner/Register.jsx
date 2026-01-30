@@ -64,19 +64,28 @@ export default function PartnerRegister() {
 
   const inputStyle = {
     width: '100%',
-    padding: '12px 16px',
-    fontSize: '16px',
-    border: '1px solid #d1d5db',
-    borderRadius: '10px',
+    padding: '14px 16px',
+    fontSize: '15px',
+    border: '1px solid #e2e8f0',
+    borderRadius: '12px',
     outline: 'none',
     transition: 'all 0.2s',
-    backgroundColor: 'white'
+    backgroundColor: '#fafbfc',
+    color: '#1e293b'
+  }
+
+  const labelStyle = {
+    display: 'block', 
+    fontSize: '14px', 
+    fontWeight: '500', 
+    color: '#1e293b', 
+    marginBottom: '8px'
   }
 
   return (
     <div style={{ 
       minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 50%, #4f46e5 100%)',
+      background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #8b5cf6 100%)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -99,15 +108,15 @@ export default function PartnerRegister() {
         {/* Register Card */}
         <div style={{ 
           backgroundColor: 'white', 
-          borderRadius: '20px', 
+          borderRadius: '24px', 
           padding: '40px',
           boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)'
         }}>
           <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-            <h1 style={{ fontSize: '28px', fontWeight: 'bold', color: '#111827', marginBottom: '8px' }}>
+            <h1 style={{ fontSize: '26px', fontWeight: '700', color: '#1e293b', marginBottom: '8px' }}>
               İşletme Hesabı Oluştur 🚀
             </h1>
-            <p style={{ color: '#6b7280', fontSize: '16px' }}>
+            <p style={{ color: '#94a3b8', fontSize: '15px' }}>
               Ücretsiz başlayın, dakikalar içinde hazır olun
             </p>
           </div>
@@ -115,7 +124,7 @@ export default function PartnerRegister() {
           <form onSubmit={handleSubmit}>
             {/* Company Name */}
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
+              <label style={labelStyle}>
                 İşletme Adı <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <input
@@ -130,7 +139,7 @@ export default function PartnerRegister() {
 
             {/* Email */}
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
+              <label style={labelStyle}>
                 E-posta <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <input
@@ -145,7 +154,7 @@ export default function PartnerRegister() {
 
             {/* Phone */}
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
+              <label style={labelStyle}>
                 Telefon
               </label>
               <input
@@ -160,7 +169,7 @@ export default function PartnerRegister() {
 
             {/* Password */}
             <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
+              <label style={labelStyle}>
                 Şifre <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <input
@@ -175,7 +184,7 @@ export default function PartnerRegister() {
 
             {/* Confirm Password */}
             <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
+              <label style={labelStyle}>
                 Şifre Tekrar <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <input
@@ -194,7 +203,7 @@ export default function PartnerRegister() {
                 padding: '12px 16px', 
                 backgroundColor: '#fef2f2', 
                 border: '1px solid #fecaca', 
-                borderRadius: '10px', 
+                borderRadius: '12px', 
                 marginBottom: '20px',
                 display: 'flex',
                 alignItems: 'center',
@@ -214,18 +223,19 @@ export default function PartnerRegister() {
               style={{ 
                 width: '100%',
                 padding: '14px 24px',
-                fontSize: '16px',
+                fontSize: '15px',
                 fontWeight: '600',
                 color: 'white',
-                backgroundColor: loading ? '#93c5fd' : '#2563eb',
+                background: loading ? '#c7d2fe' : 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
                 border: 'none',
-                borderRadius: '10px',
+                borderRadius: '12px',
                 cursor: loading ? 'not-allowed' : 'pointer',
                 transition: 'all 0.2s',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '8px'
+                gap: '8px',
+                boxShadow: loading ? 'none' : '0 4px 14px rgba(99, 102, 241, 0.35)'
               }}
             >
               {loading && (
@@ -239,10 +249,10 @@ export default function PartnerRegister() {
           </form>
 
           {/* Login Link */}
-          <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid #e5e7eb', textAlign: 'center' }}>
-            <p style={{ color: '#6b7280', fontSize: '14px' }}>
+          <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid #f0f0f0', textAlign: 'center' }}>
+            <p style={{ color: '#94a3b8', fontSize: '14px' }}>
               Zaten hesabınız var mı?{' '}
-              <Link to="/partner/login" style={{ color: '#2563eb', fontWeight: '600', textDecoration: 'none' }}>
+              <Link to="/partner/login" style={{ color: '#6366f1', fontWeight: '600', textDecoration: 'none' }}>
                 Giriş yapın
               </Link>
             </p>
@@ -251,7 +261,7 @@ export default function PartnerRegister() {
 
         {/* Back to home */}
         <div style={{ marginTop: '24px', textAlign: 'center' }}>
-          <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.7)', fontSize: '14px', textDecoration: 'none' }}>
+          <Link to="/" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'rgba(255,255,255,0.8)', fontSize: '14px', textDecoration: 'none', fontWeight: '500' }}>
             <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
@@ -266,8 +276,12 @@ export default function PartnerRegister() {
           to { transform: rotate(360deg); }
         }
         input:focus {
-          border-color: #2563eb !important;
-          box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1) !important;
+          border-color: #6366f1 !important;
+          box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1) !important;
+          background-color: white !important;
+        }
+        input::placeholder {
+          color: #94a3b8;
         }
       `}</style>
     </div>
