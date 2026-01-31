@@ -40,9 +40,33 @@ export default function NotificationBell({ userId, userType = 'partner' }) {
   const dropdownRef = useRef(null)
 
   useEffect(() => {
-    if (userId) {
-      loadNotifications()
-      subscribeToNotifications()
+    if (!userId) return
+    
+    loadNotifications()
+    
+    // Subscribe to realtime notifications
+    const channel = supabase
+      .channel(`notifications-${userId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${userId}`,
+        },
+        (payload) => {
+          console.log('New notification:', payload.new)
+          setNotifications(prev => [payload.new, ...prev])
+          setUnreadCount(prev => prev + 1)
+        }
+      )
+      .subscribe((status) => {
+        console.log('Notification subscription status:', status)
+      })
+
+    return () => {
+      supabase.removeChannel(channel)
     }
   }, [userId])
 
@@ -70,30 +94,6 @@ export default function NotificationBell({ userId, userType = 'partner' }) {
       setUnreadCount(data.filter(n => !n.is_read).length)
     }
     setLoading(false)
-  }
-
-  const subscribeToNotifications = () => {
-    const subscription = supabase
-      .channel('notifications')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'notifications',
-          filter: `user_id=eq.${userId}`,
-        },
-        (payload) => {
-          setNotifications(prev => [payload.new, ...prev])
-          setUnreadCount(prev => prev + 1)
-          // Play sound or show browser notification if desired
-        }
-      )
-      .subscribe()
-
-    return () => {
-      subscription.unsubscribe()
-    }
   }
 
   const markAsRead = async (notificationId) => {

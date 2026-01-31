@@ -71,6 +71,33 @@ export default function Appointments() {
     checkUser()
   }, [])
 
+  // Realtime subscription for appointment updates
+  useEffect(() => {
+    if (!partner?.id) return
+
+    const channel = supabase
+      .channel(`appointments-${partner.id}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // INSERT, UPDATE, DELETE
+          schema: 'public',
+          table: 'appointments',
+          filter: `partner_id=eq.${partner.id}`,
+        },
+        (payload) => {
+          console.log('Appointment change:', payload)
+          // Reload appointments when any change happens
+          loadAppointments(partner.id)
+        }
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [partner?.id])
+
   const checkUser = async () => {
     const { user: currentUser, error } = await auth.getUser()
     if (error || !currentUser) {
