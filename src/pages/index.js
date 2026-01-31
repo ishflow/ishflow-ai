@@ -12,3 +12,12 @@ export { default as PartnerAppointments } from './partner/Appointments'
 export { default as PartnerCustomers } from './partner/Customers'
 export { default as PartnerSettings } from './partner/Settings'
 export { default as BookAppointment } from './BookAppointment'
+
+// Customer pages
+export { default as CustomerLogin } from './customer/Login'
+export { default as CustomerRegister } from './customer/Register'
+export { default as CustomerDashboard } from './customer/Dashboard'
+export { default as CustomerAppointments } from './customer/Appointments'
+export { default as CustomerFavorites } from './customer/Favorites'
+export { default as CustomerProfile } from './customer/Profile'
+export { default as CustomerSearch } from './customer/Search'

@@ -46,7 +46,8 @@ export default function PartnerRegister() {
     try {
       const { data, error: authError } = await auth.signUp(formData.email, formData.password, {
         company_name: formData.companyName,
-        phone: formData.phone
+        phone: formData.phone,
+        role: 'partner'
       })
 
       if (authError) {

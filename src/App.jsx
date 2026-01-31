@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import { Home, Search, BusinessProfile, PartnerLogin, PartnerRegister, PartnerDashboard, PartnerServices, PartnerServiceForm, PartnerStaff, PartnerStaffForm, PartnerAppointments, PartnerCustomers, PartnerSettings, BookAppointment } from './pages'
+import { Home, Search, BusinessProfile, PartnerLogin, PartnerRegister, PartnerDashboard, PartnerServices, PartnerServiceForm, PartnerStaff, PartnerStaffForm, PartnerAppointments, PartnerCustomers, PartnerSettings, BookAppointment, CustomerLogin, CustomerRegister, CustomerDashboard, CustomerAppointments, CustomerFavorites, CustomerProfile, CustomerSearch } from './pages'
 
 function App() {
   return (
@@ -26,7 +26,13 @@ function App() {
         
         {/* Customer/Booking Routes */}
         <Route path="/book/:businessId" element={<BookAppointment />} />
-        <Route path="/customer" element={<ComingSoon title="Müşteri Girişi" />} />
+        <Route path="/customer/login" element={<CustomerLogin />} />
+        <Route path="/customer/register" element={<CustomerRegister />} />
+        <Route path="/customer/dashboard" element={<CustomerDashboard />} />
+        <Route path="/customer/appointments" element={<CustomerAppointments />} />
+        <Route path="/customer/favorites" element={<CustomerFavorites />} />
+        <Route path="/customer/profile" element={<CustomerProfile />} />
+        <Route path="/customer/search" element={<CustomerSearch />} />
         
         {/* 404 */}
         <Route path="*" element={<NotFound />} />

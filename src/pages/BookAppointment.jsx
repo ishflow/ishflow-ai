@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { getCustomerUser } from '../lib/customerAuth'
 
 export default function BookAppointment() {
   const { businessId } = useParams()
@@ -17,10 +18,32 @@ export default function BookAppointment() {
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
   const [customerInfo, setCustomerInfo] = useState({ name: '', phone: '', email: '', notes: '' })
+  
+  // Müşteri auth bilgisi
+  const [loggedInCustomer, setLoggedInCustomer] = useState(null)
 
   useEffect(() => {
     loadData()
+    checkCustomerAuth()
   }, [businessId])
+  
+  const checkCustomerAuth = async () => {
+    const { user } = await getCustomerUser()
+    console.log('BookAppointment - checkCustomerAuth:', user)
+    console.log('BookAppointment - user_metadata:', user?.user_metadata)
+    // Partner değilse ve giriş yapmışsa kabul et
+    if (user && user.user_metadata?.role !== 'partner') {
+      console.log('BookAppointment - Setting loggedInCustomer')
+      setLoggedInCustomer(user)
+      // Müşteri bilgilerini otomatik doldur
+      setCustomerInfo({
+        name: user.user_metadata?.name || '',
+        phone: user.user_metadata?.phone || '',
+        email: user.email || '',
+        notes: ''
+      })
+    }
+  }
 
   const loadData = async () => {
     const [businessRes, servicesRes, staffRes] = await Promise.all([
@@ -59,10 +82,22 @@ export default function BookAppointment() {
 
     if (existingCustomer) {
       customerId = existingCustomer.id
+      // Eğer giriş yapmış müşteri ise auth_user_id'yi güncelle
+      if (loggedInCustomer) {
+        await supabase
+          .from('customers')
+          .update({ auth_user_id: loggedInCustomer.id })
+          .eq('id', existingCustomer.id)
+      }
     } else {
       const { data: newCustomer } = await supabase
         .from('customers')
-        .insert({ partner_id: businessId, ...customerInfo })
+        .insert({ 
+          partner_id: businessId, 
+          ...customerInfo,
+          // Giriş yapmış müşteri ise auth_user_id ekle
+          auth_user_id: loggedInCustomer?.id || null
+        })
         .select()
         .single()
       customerId = newCustomer?.id
@@ -152,7 +187,7 @@ export default function BookAppointment() {
         <p style={{ color: '#6b7280', marginBottom: '32px' }}>
           {step === 1 && 'Hizmet seçin'}
           {step === 2 && 'Tarih ve saat seçin'}
-          {step === 3 && 'Bilgilerinizi girin'}
+          {step === 3 && (loggedInCustomer ? 'Randevuyu onaylayın' : 'Bilgilerinizi girin')}
         </p>
 
         {/* Step 1: Service Selection */}
@@ -249,47 +284,112 @@ export default function BookAppointment() {
           </div>
         )}
 
-        {/* Step 3: Customer Info */}
+        {/* Step 3: Customer Info / Confirmation */}
         {step === 3 && (
           <div style={{ display: 'grid', gap: '20px' }}>
-            <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>Ad Soyad *</label>
-              <input
-                value={customerInfo.name}
-                onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })}
-                placeholder="Adınız Soyadınız"
-                style={{ width: '100%', padding: '12px 16px', fontSize: '16px', border: '1px solid #d1d5db', borderRadius: '10px' }}
-              />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>Telefon *</label>
-              <input
-                value={customerInfo.phone}
-                onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
-                placeholder="+90 555 123 4567"
-                style={{ width: '100%', padding: '12px 16px', fontSize: '16px', border: '1px solid #d1d5db', borderRadius: '10px' }}
-              />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>E-posta</label>
-              <input
-                type="email"
-                value={customerInfo.email}
-                onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
-                placeholder="ornek@email.com"
-                style={{ width: '100%', padding: '12px 16px', fontSize: '16px', border: '1px solid #d1d5db', borderRadius: '10px' }}
-              />
-            </div>
-            <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>Not</label>
-              <textarea
-                value={customerInfo.notes}
-                onChange={(e) => setCustomerInfo({ ...customerInfo, notes: e.target.value })}
-                placeholder="Eklemek istediğiniz bir not..."
-                rows={3}
-                style={{ width: '100%', padding: '12px 16px', fontSize: '16px', border: '1px solid #d1d5db', borderRadius: '10px', resize: 'vertical' }}
-              />
-            </div>
+            {/* Giriş yapmış müşteri için özet göster */}
+            {loggedInCustomer ? (
+              <>
+                <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '12px', padding: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#22c55e', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', fontWeight: '600' }}>
+                    {customerInfo.name?.charAt(0) || '?'}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: '600', color: '#166534' }}>{customerInfo.name}</div>
+                    <div style={{ fontSize: '14px', color: '#16a34a' }}>{customerInfo.phone} • {customerInfo.email}</div>
+                  </div>
+                </div>
+                
+                {/* Randevu özeti */}
+                <div style={{ backgroundColor: 'white', border: '1px solid #e5e7eb', borderRadius: '12px', padding: '16px' }}>
+                  <h3 style={{ fontSize: '14px', fontWeight: '600', color: '#374151', marginBottom: '12px' }}>Randevu Özeti</h3>
+                  <div style={{ display: 'grid', gap: '8px', fontSize: '14px', color: '#6b7280' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Hizmet:</span>
+                      <span style={{ fontWeight: '500', color: '#111827' }}>{selectedService?.name}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Tarih:</span>
+                      <span style={{ fontWeight: '500', color: '#111827' }}>{selectedDate && new Date(selectedDate).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span>Saat:</span>
+                      <span style={{ fontWeight: '500', color: '#111827' }}>{selectedTime}</span>
+                    </div>
+                    {selectedStaff && (
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span>Personel:</span>
+                        <span style={{ fontWeight: '500', color: '#111827' }}>{selectedStaff.name}</span>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid #e5e7eb', paddingTop: '8px', marginTop: '4px' }}>
+                      <span style={{ fontWeight: '600' }}>Toplam:</span>
+                      <span style={{ fontWeight: '700', color: '#2563eb' }}>{formatPrice(selectedService?.price)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Not alanı */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>Not (opsiyonel)</label>
+                  <textarea
+                    value={customerInfo.notes}
+                    onChange={(e) => setCustomerInfo({ ...customerInfo, notes: e.target.value })}
+                    placeholder="Eklemek istediğiniz bir not..."
+                    rows={2}
+                    style={{ width: '100%', padding: '12px 16px', fontSize: '16px', border: '1px solid #d1d5db', borderRadius: '10px', resize: 'vertical' }}
+                  />
+                </div>
+              </>
+            ) : (
+              /* Giriş yapmamış kullanıcı için form göster */
+              <>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>Ad Soyad *</label>
+                  <input
+                    value={customerInfo.name}
+                    onChange={(e) => setCustomerInfo({ ...customerInfo, name: e.target.value })}
+                    placeholder="Adınız Soyadınız"
+                    style={{ width: '100%', padding: '12px 16px', fontSize: '16px', border: '1px solid #d1d5db', borderRadius: '10px' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>Telefon *</label>
+                  <input
+                    value={customerInfo.phone}
+                    onChange={(e) => setCustomerInfo({ ...customerInfo, phone: e.target.value })}
+                    placeholder="+90 555 123 4567"
+                    style={{ width: '100%', padding: '12px 16px', fontSize: '16px', border: '1px solid #d1d5db', borderRadius: '10px' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>E-posta</label>
+                  <input
+                    type="email"
+                    value={customerInfo.email}
+                    onChange={(e) => setCustomerInfo({ ...customerInfo, email: e.target.value })}
+                    placeholder="ornek@email.com"
+                    style={{ width: '100%', padding: '12px 16px', fontSize: '16px', border: '1px solid #d1d5db', borderRadius: '10px' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>Not</label>
+                  <textarea
+                    value={customerInfo.notes}
+                    onChange={(e) => setCustomerInfo({ ...customerInfo, notes: e.target.value })}
+                    placeholder="Eklemek istediğiniz bir not..."
+                    rows={3}
+                    style={{ width: '100%', padding: '12px 16px', fontSize: '16px', border: '1px solid #d1d5db', borderRadius: '10px', resize: 'vertical' }}
+                  />
+                </div>
+                
+                {/* Giriş yap linki */}
+                <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '12px', padding: '16px', textAlign: 'center' }}>
+                  <p style={{ fontSize: '14px', color: '#1e40af', marginBottom: '8px' }}>Zaten hesabınız var mı?</p>
+                  <Link to="/customer/login" style={{ color: '#2563eb', fontWeight: '600', textDecoration: 'none' }}>Giriş yapın →</Link>
+                </div>
+              </>
+            )}
           </div>
         )}
 

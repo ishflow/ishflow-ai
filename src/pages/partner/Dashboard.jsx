@@ -48,12 +48,50 @@ export default function PartnerDashboard() {
     checkUser()
   }, [])
 
+  // Sayfa focus olunca verileri yenile (ücretsiz alternatif)
+  useEffect(() => {
+    if (!user?.id) return
+
+    const handleFocus = () => {
+      loadData(user.id)
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        loadData(user.id)
+      }
+    }
+
+    window.addEventListener('focus', handleFocus)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      window.removeEventListener('focus', handleFocus)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [user?.id])
+
   const checkUser = async () => {
     const { user: currentUser, error } = await auth.getUser()
     if (error || !currentUser) {
       navigate('/partner/login')
       return
     }
+    
+    // Partner tablosunda kayıt var mı kontrol et
+    const { data: partnerData } = await supabase
+      .from('partners')
+      .select('id')
+      .eq('id', currentUser.id)
+      .single()
+    
+    if (!partnerData) {
+      // Bu kullanıcı partner değil, login'e yönlendir
+      await auth.signOut()
+      navigate('/partner/login')
+      return
+    }
+    
     setUser(currentUser)
     await loadData(currentUser.id)
   }
@@ -77,18 +115,20 @@ export default function PartnerDashboard() {
         customers: customersRes.count || 0
       })
 
-      // Load recent appointments
+      // Load upcoming appointments (bugün ve sonrası)
+      const today = new Date().toISOString()
       const { data: appointments } = await supabase
         .from('appointments')
         .select(`
           *,
-          services(name),
+          services(name, duration_minutes, price),
           staff(name),
           customers(name, phone)
         `)
         .eq('partner_id', partnerId)
-        .order('appointment_date', { ascending: true })
-        .order('appointment_time', { ascending: true })
+        .gte('start_time', today)
+        .in('status', ['pending', 'confirmed'])
+        .order('start_time', { ascending: true })
         .limit(5)
       
       setRecentAppointments(appointments || [])
@@ -212,53 +252,68 @@ export default function PartnerDashboard() {
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {recentAppointments.map((apt, i) => (
-                <div 
-                  key={i}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '16px',
-                    padding: '16px',
-                    backgroundColor: '#fafbfc',
-                    borderRadius: '12px',
-                    border: '1px solid #f0f0f0'
-                  }}
-                >
-                  <div style={{
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '10px',
-                    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'white'
-                  }}>
-                    <span style={{ fontSize: '14px', fontWeight: '700', lineHeight: 1 }}>{formatDate(apt.appointment_date).split(' ')[0]}</span>
-                    <span style={{ fontSize: '10px', opacity: 0.9 }}>{formatDate(apt.appointment_date).split(' ')[1]}</span>
+              {recentAppointments.map((apt, i) => {
+                const startDate = new Date(apt.start_time)
+                const statusColors = {
+                  confirmed: { bg: '#ecfdf5', text: '#059669', label: 'Onaylı' },
+                  pending: { bg: '#fef3c7', text: '#d97706', label: 'Bekliyor' }
+                }
+                const status = statusColors[apt.status] || { bg: '#f1f5f9', text: '#64748b', label: apt.status }
+                
+                return (
+                  <div 
+                    key={apt.id || i}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px',
+                      padding: '16px',
+                      backgroundColor: '#fafbfc',
+                      borderRadius: '12px',
+                      border: '1px solid #f0f0f0'
+                    }}
+                  >
+                    <div style={{
+                      width: '48px',
+                      height: '48px',
+                      borderRadius: '10px',
+                      background: apt.status === 'confirmed' 
+                        ? 'linear-gradient(135deg, #10b981 0%, #34d399 100%)'
+                        : 'linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%)',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'white'
+                    }}>
+                      <span style={{ fontSize: '14px', fontWeight: '700', lineHeight: 1 }}>
+                        {startDate.getDate()}
+                      </span>
+                      <span style={{ fontSize: '10px', opacity: 0.9, textTransform: 'capitalize' }}>
+                        {startDate.toLocaleDateString('tr-TR', { month: 'short' })}
+                      </span>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <p style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: 0 }}>
+                        {apt.customers?.name || 'Müşteri'}
+                      </p>
+                      <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0 }}>
+                        {apt.services?.name} • {startDate.toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                      </p>
+                    </div>
+                    <span style={{
+                      padding: '4px 10px',
+                      borderRadius: '20px',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      backgroundColor: status.bg,
+                      color: status.text
+                    }}>
+                      {status.label}
+                    </span>
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: 0 }}>
-                      {apt.customers?.name || 'Müşteri'}
-                    </p>
-                    <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0 }}>
-                      {apt.services?.name} • {formatTime(apt.appointment_time)}
-                    </p>
-                  </div>
-                  <span style={{
-                    padding: '4px 10px',
-                    borderRadius: '20px',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    backgroundColor: apt.status === 'confirmed' ? '#ecfdf5' : apt.status === 'pending' ? '#fef3c7' : '#f1f5f9',
-                    color: apt.status === 'confirmed' ? '#059669' : apt.status === 'pending' ? '#d97706' : '#64748b'
-                  }}>
-                    {apt.status === 'confirmed' ? 'Onaylı' : apt.status === 'pending' ? 'Bekliyor' : apt.status}
-                  </span>
-                </div>
-              ))}
+                )
+              })}
             </div>
           )}
         </div>
