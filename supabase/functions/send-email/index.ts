@@ -346,25 +346,49 @@ serve(async (req) => {
       )
     }
 
-    const payload: EmailPayload = await req.json()
+    const body = await req.json()
+    
+    // Support both direct call and webhook format
+    // Webhook format: { type: 'INSERT', table: 'email_queue', record: {...} }
+    // Direct format: { to, type, data }
+    let to: string
+    let type: string
+    let data: any
+    
+    if (body.type === 'INSERT' && body.record) {
+      // Database webhook format
+      to = body.record.to_email
+      type = body.record.template
+      data = body.record.data
+    } else if (body.to_email && body.template) {
+      // Queue record format (from pg_net)
+      to = body.to_email
+      type = body.template
+      data = body.data
+    } else {
+      // Direct call format
+      to = body.to
+      type = body.type
+      data = body.data
+    }
 
-    if (!payload.to || !payload.type) {
+    if (!to || !type) {
       return new Response(
         JSON.stringify({ error: 'Missing to or type' }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       )
     }
 
-    const template = templates[payload.type]
+    const template = templates[type as keyof typeof templates]
     if (!template) {
       return new Response(
-        JSON.stringify({ error: 'Invalid email type' }),
+        JSON.stringify({ error: `Invalid email type: ${type}` }),
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       )
     }
 
-    const { subject, html } = template(payload.data)
-    const result = await sendEmail(payload.to, subject, html)
+    const { subject, html } = template(data)
+    const result = await sendEmail(to, subject, html)
 
     return new Response(
       JSON.stringify({ success: true, result }),
