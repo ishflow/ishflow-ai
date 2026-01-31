@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { auth } from '../lib/supabase'
+import NotificationBell from './NotificationBell'
 
 // SVG Icons
 const Icons = {
@@ -380,27 +381,7 @@ export default function PartnerLayout({ children, partner, user, title, subtitle
               <span style={{ fontSize: '11px', color: '#94a3b8', backgroundColor: '#e2e8f0', padding: '2px 6px', borderRadius: '4px' }}>⌘K</span>
             </div>
             {/* Notifications */}
-            <button style={{ 
-              padding: '10px',
-              backgroundColor: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: '10px',
-              cursor: 'pointer',
-              color: '#64748b',
-              position: 'relative'
-            }}>
-              {Icons.bell}
-              <span style={{ 
-                position: 'absolute',
-                top: '8px',
-                right: '8px',
-                width: '8px',
-                height: '8px',
-                backgroundColor: '#ef4444',
-                borderRadius: '50%',
-                border: '2px solid white'
-              }}></span>
-            </button>
+            <NotificationBell userId={user?.id} />
             {/* User Avatar */}
             <div style={{ 
               width: '40px', 

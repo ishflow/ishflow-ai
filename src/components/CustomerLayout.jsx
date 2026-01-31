@@ -1,6 +1,7 @@
 import React from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { customerLogout } from '../lib/customerAuth'
+import NotificationBell from './NotificationBell'
 
 // Icons
 const HomeIcon = (
@@ -134,10 +135,7 @@ export default function CustomerLayout({ children, user, title, subtitle }) {
             {subtitle && <p style={styles.pageSubtitle}>{subtitle}</p>}
           </div>
           <div style={styles.headerRight}>
-            <button style={styles.notificationBtn}>
-              {BellIcon}
-              <span style={styles.notificationBadge}>2</span>
-            </button>
+            <NotificationBell userId={user?.id} />
             <Link to="/customer/search" style={styles.newBookingBtn}>
               + Yeni Randevu
             </Link>
