@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 
 const BellIcon = (
@@ -30,7 +31,8 @@ const typeColors = {
   review_new: '#8b5cf6',
 }
 
-export default function NotificationBell({ userId }) {
+export default function NotificationBell({ userId, userType = 'partner' }) {
+  const navigate = useNavigate()
   const [notifications, setNotifications] = useState([])
   const [unreadCount, setUnreadCount] = useState(0)
   const [isOpen, setIsOpen] = useState(false)
@@ -108,6 +110,27 @@ export default function NotificationBell({ userId }) {
     }
   }
 
+  const handleNotificationClick = async (notification) => {
+    // Mark as read
+    if (!notification.is_read) {
+      await markAsRead(notification.id)
+    }
+    
+    // Close dropdown
+    setIsOpen(false)
+    
+    // Navigate based on notification type and user type
+    if (notification.type.startsWith('appointment_')) {
+      if (userType === 'partner') {
+        navigate('/partner/appointments')
+      } else {
+        navigate('/customer/appointments')
+      }
+    } else if (notification.type === 'review_new') {
+      navigate('/partner/reviews')
+    }
+  }
+
   const markAllAsRead = async () => {
     const unreadIds = notifications.filter(n => !n.is_read).map(n => n.id)
     if (unreadIds.length === 0) return
@@ -173,11 +196,11 @@ export default function NotificationBell({ userId }) {
               notifications.map(notification => (
                 <div
                   key={notification.id}
-                  onClick={() => !notification.is_read && markAsRead(notification.id)}
+                  onClick={() => handleNotificationClick(notification)}
                   style={{
                     ...styles.item,
                     backgroundColor: notification.is_read ? '#fff' : '#f0f4ff',
-                    cursor: notification.is_read ? 'default' : 'pointer',
+                    cursor: 'pointer',
                   }}
                 >
                   <div 

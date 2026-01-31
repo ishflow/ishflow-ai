@@ -135,7 +135,7 @@ export default function CustomerLayout({ children, user, title, subtitle }) {
             {subtitle && <p style={styles.pageSubtitle}>{subtitle}</p>}
           </div>
           <div style={styles.headerRight}>
-            <NotificationBell userId={user?.id} />
+            <NotificationBell userId={user?.id} userType="customer" />
             <Link to="/customer/search" style={styles.newBookingBtn}>
               + Yeni Randevu
             </Link>

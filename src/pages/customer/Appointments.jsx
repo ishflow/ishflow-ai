@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
+import { supabase } from '../../lib/supabase'
 import { getCustomerUser, getCustomerAppointments } from '../../lib/customerAuth'
 import CustomerLayout from '../../components/CustomerLayout'
 
@@ -25,6 +26,8 @@ export default function CustomerAppointments() {
   const [appointments, setAppointments] = useState([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'upcoming')
+  const [cancelModal, setCancelModal] = useState(null)
+  const [cancelling, setCancelling] = useState(false)
 
   useEffect(() => {
     loadData()
@@ -40,6 +43,27 @@ export default function CustomerAppointments() {
     const { data } = await getCustomerAppointments(currentUser.id)
     setAppointments(data || [])
     setLoading(false)
+  }
+
+  const handleCancel = async (appointment) => {
+    setCancelling(true)
+    
+    // Update appointment status to cancelled
+    const { error } = await supabase
+      .from('appointments')
+      .update({ status: 'cancelled' })
+      .eq('id', appointment.id)
+    
+    if (error) {
+      alert('İptal işlemi başarısız: ' + error.message)
+    } else {
+      // Update local state
+      setAppointments(prev => 
+        prev.map(a => a.id === appointment.id ? { ...a, status: 'cancelled' } : a)
+      )
+      setCancelModal(null)
+    }
+    setCancelling(false)
   }
 
   const upcomingAppointments = appointments.filter(a => 
@@ -148,8 +172,8 @@ export default function CustomerAppointments() {
 
                 {activeTab === 'upcoming' && apt.status !== 'cancelled' && (
                   <div style={styles.cardFooter}>
-                    <button style={styles.cancelButton}>İptal Et</button>
-                    <button style={styles.rescheduleButton}>Tarih Değiştir</button>
+                    <button onClick={() => setCancelModal(apt)} style={styles.cancelButton}>İptal Et</button>
+                    <button onClick={() => navigate(`/book/${apt.partner_id}?reschedule=${apt.id}`)} style={styles.rescheduleButton}>Tarih Değiştir</button>
                   </div>
                 )}
 
@@ -164,6 +188,39 @@ export default function CustomerAppointments() {
           </div>
         )}
       </div>
+
+      {/* Cancel Confirmation Modal */}
+      {cancelModal && (
+        <div style={styles.modalOverlay}>
+          <div style={styles.modal}>
+            <div style={styles.modalIcon}>⚠️</div>
+            <h3 style={styles.modalTitle}>Randevuyu İptal Et</h3>
+            <p style={styles.modalText}>
+              <strong>{cancelModal.partners?.company_name}</strong> işletmesindeki 
+              <strong> {cancelModal.services?.name}</strong> randevunuzu iptal etmek istediğinize emin misiniz?
+            </p>
+            <p style={styles.modalDate}>
+              📅 {formatDate(cancelModal.start_time)} - {formatTime(cancelModal.start_time)}
+            </p>
+            <div style={styles.modalButtons}>
+              <button 
+                onClick={() => setCancelModal(null)} 
+                style={styles.modalCancelBtn}
+                disabled={cancelling}
+              >
+                Vazgeç
+              </button>
+              <button 
+                onClick={() => handleCancel(cancelModal)} 
+                style={styles.modalConfirmBtn}
+                disabled={cancelling}
+              >
+                {cancelling ? 'İptal Ediliyor...' : 'Evet, İptal Et'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </CustomerLayout>
   )
 }
@@ -340,6 +397,71 @@ const styles = {
     background: 'linear-gradient(135deg, #6366f1, #8b5cf6)',
     color: '#fff',
     fontSize: '13px',
+    fontWeight: '500',
+    cursor: 'pointer',
+  },
+  modalOverlay: {
+    position: 'fixed',
+    inset: 0,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+  },
+  modal: {
+    backgroundColor: '#fff',
+    borderRadius: '20px',
+    padding: '32px',
+    maxWidth: '400px',
+    width: '90%',
+    textAlign: 'center',
+  },
+  modalIcon: {
+    fontSize: '48px',
+    marginBottom: '16px',
+  },
+  modalTitle: {
+    fontSize: '20px',
+    fontWeight: '600',
+    color: '#1e293b',
+    marginBottom: '12px',
+  },
+  modalText: {
+    fontSize: '14px',
+    color: '#64748b',
+    marginBottom: '8px',
+    lineHeight: '1.5',
+  },
+  modalDate: {
+    fontSize: '14px',
+    color: '#1e293b',
+    fontWeight: '500',
+    marginBottom: '24px',
+  },
+  modalButtons: {
+    display: 'flex',
+    gap: '12px',
+  },
+  modalCancelBtn: {
+    flex: 1,
+    padding: '12px 20px',
+    borderRadius: '10px',
+    border: '1px solid #e5e7eb',
+    backgroundColor: '#fff',
+    color: '#64748b',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer',
+  },
+  modalConfirmBtn: {
+    flex: 1,
+    padding: '12px 20px',
+    borderRadius: '10px',
+    border: 'none',
+    backgroundColor: '#dc2626',
+    color: '#fff',
+    fontSize: '14px',
     fontWeight: '500',
     cursor: 'pointer',
   },
